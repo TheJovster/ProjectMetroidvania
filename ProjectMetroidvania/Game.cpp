@@ -3,7 +3,7 @@
 namespace Metroidvania {
 
     Game::Game()
-        : m_tileMap(20, 12)
+        : m_tileMap(40, 20)
         , m_player(sf::Vector2f(256.f, 500.f))
         , m_camera(sf::Vector2u(
             sf::VideoMode::getDesktopMode().size.x,
@@ -22,8 +22,9 @@ namespace Metroidvania {
 
         m_camera.setRoomBounds(sf::FloatRect(
             { 0.f, 0.f },
-            { 20 * k_tileSize, 12 * k_tileSize }
+            { m_tileMap.getWidth(), m_tileMap.getHeight() }
         ));
+
         m_camera.setMode(CameraMode::Free);
 
         buildTestLevel();
@@ -88,16 +89,17 @@ namespace Metroidvania {
 
     void Game::buildTestLevel()
     {
-        m_tileMap.buildFloor(9);
+        m_tileMap.buildFloor(17);
 
-        for (int row = 0; row < 9; ++row)
+        for (int row = 0; row < 17; ++row)
         {
             m_tileMap.setTile(0, row, TileType::Stone);
-            m_tileMap.setTile(19, row, TileType::Stone);
+            m_tileMap.setTile(39, row, TileType::Stone);
         }
 
-        m_tileMap.buildRow(6, 5, 8, TileType::Stone);
-        m_tileMap.buildRow(4, 11, 14, TileType::Stone);
+        m_tileMap.buildRow(14, 5, 10, TileType::Stone);
+        m_tileMap.buildRow(11, 15, 22, TileType::Stone);
+        m_tileMap.buildRow(8, 25, 32, TileType::Stone);
     }
 
 }

@@ -9,7 +9,7 @@
 namespace Metroidvania {
 
     constexpr float k_playerMoveSpeed = 300.f;
-    constexpr float k_playerJumpForce = -700.f;
+    constexpr float k_playerJumpForce = -1000.f;
     constexpr float k_gravity = 1800.f;
     constexpr float k_maxFallSpeed = 900.f;
     constexpr int   k_coyoteFrames = 6;       // tight - tune during feel pass

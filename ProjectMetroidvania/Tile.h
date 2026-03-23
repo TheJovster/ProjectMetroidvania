@@ -4,7 +4,7 @@
 namespace Metroidvania {
 
     // Environment tiles are 128x128
-    constexpr float k_tileSize = 128.f;
+    constexpr float k_tileSize = 64.f;
 
     enum class TileType {
         Stone,      // standard floor/wall
