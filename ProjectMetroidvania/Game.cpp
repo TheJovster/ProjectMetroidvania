@@ -5,8 +5,10 @@ namespace Metroidvania {
     Game::Game()
         : m_tileMap(20, 12)
         , m_player(sf::Vector2f(256.f, 500.f))
+        , m_camera(sf::Vector2u(
+            sf::VideoMode::getDesktopMode().size.x,
+            sf::VideoMode::getDesktopMode().size.y))
     {
-        // --- Window ---
         sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
 
         m_window.create(
@@ -18,13 +20,18 @@ namespace Metroidvania {
         m_window.setFramerateLimit(60);
         m_window.setMouseCursorVisible(false);
 
-        // --- World ---
+        m_camera.setRoomBounds(sf::FloatRect(
+            { 0.f, 0.f },
+            { 20 * k_tileSize, 12 * k_tileSize }
+        ));
+        m_camera.setMode(CameraMode::Free);
+
         buildTestLevel();
+
+        m_camera.snapTo(m_player.getPosition());
     }
 
-    // -------------------------------------------------------
-    // Run
-    // -------------------------------------------------------
+
     void Game::run()
     {
         while (m_window.isOpen())
@@ -35,44 +42,41 @@ namespace Metroidvania {
             update(dt);
             render();
 
-            m_input.tick(); // age buffer, clear per-frame state - always last
+            m_input.tick(); //age buffer - always last
         }
     }
 
-    // -------------------------------------------------------
-    // Events
-    // -------------------------------------------------------
     void Game::processEvents()
     {
         while (const std::optional<sf::Event> event = m_window.pollEvent())
         {
-            // Window close
             if (event->is<sf::Event::Closed>())
                 m_window.close();
 
-            // Feed everything to input
             m_input.update(*event);
 
-            // Escape to exit
             if (const auto* key = event->getIf<sf::Event::KeyPressed>())
                 if (key->code == sf::Keyboard::Key::Escape)
                     m_window.close();
         }
     }
 
-    // -------------------------------------------------------
-    // Update
-    // -------------------------------------------------------
+
     void Game::update(float dt)
     {
         m_player.update(dt, m_input, m_tileMap);
+
+        m_camera.update(
+            dt,
+            m_player.getPosition(),
+            m_player.getAnimator().isFacingRight()
+        );
     }
 
-    // -------------------------------------------------------
-    // Render
-    // -------------------------------------------------------
     void Game::render()
     {
+        m_camera.apply(m_window);
+
         m_window.clear(sf::Color::Black);
 
         m_tileMap.draw(m_window);
@@ -81,25 +85,18 @@ namespace Metroidvania {
         m_window.display();
     }
 
-    // -------------------------------------------------------
-    // Level
-    // -------------------------------------------------------
+
     void Game::buildTestLevel()
     {
-        // Floor at row 9 - leaves room above for jumping
         m_tileMap.buildFloor(9);
 
-        // Left and right walls
         for (int row = 0; row < 9; ++row)
         {
             m_tileMap.setTile(0, row, TileType::Stone);
             m_tileMap.setTile(19, row, TileType::Stone);
         }
 
-        // A platform to jump to
         m_tileMap.buildRow(6, 5, 8, TileType::Stone);
-
-        // A higher platform
         m_tileMap.buildRow(4, 11, 14, TileType::Stone);
     }
 

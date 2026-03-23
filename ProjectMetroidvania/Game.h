@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "TileMap.h"
 #include "Player.h"
+#include "Camera.h"
 
 namespace Metroidvania {
 
@@ -15,23 +16,19 @@ namespace Metroidvania {
         void run();
 
     private:
-        // --- Core ---
         sf::RenderWindow m_window;
         sf::Clock        m_clock;
 
-        // --- Systems ---
         Input   m_input;
+        Camera  m_camera;
 
-        // --- World ---
         TileMap m_tileMap;
         Player  m_player;
 
-        // --- Game loop ---
         void processEvents();
         void update(float dt);
         void render();
 
-        // --- Setup ---
         void buildTestLevel();
     };
 

@@ -134,6 +134,7 @@ sfml-audio-d.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-system.li
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Animator.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -147,6 +148,7 @@ sfml-audio-d.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-system.li
     <ClInclude Include="Action.h" />
     <ClInclude Include="AnimationState.h" />
     <ClInclude Include="Animator.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Input.h" />
