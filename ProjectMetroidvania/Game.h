@@ -5,6 +5,7 @@
 #include "TileMap.h"
 #include "Player.h"
 #include "Camera.h"
+#include "DevMode.h"
 
 namespace Metroidvania {
 
@@ -22,7 +23,13 @@ namespace Metroidvania {
         Input   m_input;
         Camera  m_camera;
 
-        TileMap m_tileMap;
+        TileMap  m_bgLayer;
+        TileMap  m_mgLayer;
+        TileMap  m_fgLayer;
+
+        DevMode  m_devMode;
+        bool     m_devModeActive = false;
+
         Player  m_player;
 
         void processEvents();

@@ -38,6 +38,8 @@ namespace Metroidvania {
         sf::Vector2f     getPosition()  const;
         sf::FloatRect    getViewBounds()const;  // what the camera currently sees
 
+        const sf::View& getView() const { return m_view; }
+
     private:
         sf::View         m_view;
         sf::Vector2f     m_target;          // where the camera wants to be
