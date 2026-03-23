@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="ProjectMetroidvania/ProjectMetroidvania.vcxproj" Id="2d7385dd-786f-41e6-a2b0-9640b2a2f0a1" />
+</Solution>
