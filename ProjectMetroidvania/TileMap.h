@@ -30,6 +30,8 @@ namespace Metroidvania {
         float getWidth() const { return m_columns * k_tileSize; }
         float getHeight()const { return m_rows * k_tileSize; }
 
+        const Tile& getTile(int col, int row) const;
+
     private:
         int m_columns;
         int m_rows;

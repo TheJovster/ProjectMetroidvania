@@ -3,23 +3,23 @@
 namespace Metroidvania {
 
     Game::Game()
-        : m_bgLayer(40, 20)
-        , m_mgLayer(40, 20)
-        , m_fgLayer(40, 20)
-        , m_player(sf::Vector2f(256.f, 500.f))
+        : m_bgLayer(80, 20)
+        , m_mgLayer(80, 20)
+        , m_fgLayer(80, 20)
+        , m_player(sf::Vector2f(256.f, 300.f))
         , m_camera(sf::Vector2u(
             sf::VideoMode::getDesktopMode().size.x,
             sf::VideoMode::getDesktopMode().size.y))
-        , m_devMode(m_bgLayer, m_mgLayer, m_fgLayer,
-            m_parallax.getFrontLayer(),
-            m_camera)
         , m_parallax(
             sf::Vector2u(
                 sf::VideoMode::getDesktopMode().size.x,
                 sf::VideoMode::getDesktopMode().size.y),
-            "",   // no background texture yet - solid color
-            ""    // no mid texture yet - solid color
+            "assets/levels/parallax/parallax_background.png",
+            "assets/levels/parallax/parallax_midground.png"
         )
+        , m_devMode(m_bgLayer, m_mgLayer, m_fgLayer,
+            m_parallax.getFrontLayer(),
+            m_camera)
     {
         sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
 
@@ -38,7 +38,12 @@ namespace Metroidvania {
         ));
         m_camera.setMode(CameraMode::Free);
 
-        buildTestLevel();
+        // try to load existing level - fall back to test level if not found
+        const std::string levelPath = "assets/levels/levelJSONS/" + m_levelName + ".json";
+        if (std::filesystem::exists(levelPath))
+            loadLevel();
+        else
+            buildTestLevel();
 
         m_camera.snapTo(m_player.getPosition());
     }
@@ -77,6 +82,15 @@ namespace Metroidvania {
                     m_devModeActive = !m_devModeActive;
                     m_devMode.setActive(m_devModeActive);
                     m_window.setMouseCursorVisible(m_devModeActive);
+                }
+
+                // ctrl+s saves the level
+                if (key->code == sf::Keyboard::Key::S)
+                {
+                    const bool ctrl = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl)
+                        || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl);
+                    if (ctrl)
+                        saveLevel();
                 }
             }
 
@@ -132,17 +146,72 @@ namespace Metroidvania {
 
     void Game::buildTestLevel()
     {
+        // floor across the whole map
         m_mgLayer.buildFloor(17);
 
+        // left and right walls
         for (int row = 0; row < 17; ++row)
         {
             m_mgLayer.setTile(0, row, TileType::Stone);
-            m_mgLayer.setTile(39, row, TileType::Stone);
+            m_mgLayer.setTile(79, row, TileType::Stone);
         }
 
+        // platforms - spread across the wide level
         m_mgLayer.buildRow(14, 5, 10, TileType::Stone);
         m_mgLayer.buildRow(11, 15, 22, TileType::Stone);
-        m_mgLayer.buildRow(8, 25, 32, TileType::Stone);
+        m_mgLayer.buildRow(13, 25, 30, TileType::Stone);
+        m_mgLayer.buildRow(10, 35, 42, TileType::Stone);
+        m_mgLayer.buildRow(12, 48, 54, TileType::Stone);
+        m_mgLayer.buildRow(9, 58, 65, TileType::Stone);
+        m_mgLayer.buildRow(14, 68, 74, TileType::Stone);
+
+        // some elevated sections to break up the run
+        m_mgLayer.buildRow(15, 20, 24, TileType::Stone);
+        m_mgLayer.buildRow(15, 44, 48, TileType::Stone);
+        m_mgLayer.buildRow(15, 62, 66, TileType::Stone);
+    }
+
+    void Game::saveLevel()
+    {
+        LevelData data;
+        data.name = m_levelName;
+        data.columns = m_mgLayer.getColumns();
+        data.rows = m_mgLayer.getRows();
+        data.playerSpawn = m_player.getPosition();
+        data.plxBkgPath = "";
+        data.plxMidPath = "";
+        data.bgColor = sf::Color(20, 20, 40);
+
+        const bool ok = m_serializer.save(
+            data,
+            m_bgLayer,
+            m_mgLayer,
+            m_fgLayer,
+            m_parallax.getFrontLayer()
+        );
+
+        if (ok)
+            std::cout << "[Game] Level saved: " << m_levelName << "\n";
+    }
+
+    void Game::loadLevel()
+    {
+        LevelData data;
+
+        const bool ok = m_serializer.load(
+            m_levelName,
+            data,
+            m_bgLayer,
+            m_mgLayer,
+            m_fgLayer,
+            m_parallax.getFrontLayer()
+        );
+
+        if (ok)
+        {
+            m_player.setPosition(data.playerSpawn);
+            std::cout << "[Game] Level loaded: " << m_levelName << "\n";
+        }
     }
 
 }

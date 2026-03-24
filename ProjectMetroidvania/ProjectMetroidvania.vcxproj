@@ -139,6 +139,9 @@ sfml-audio-d.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-system.li
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Input.cpp" />
+    <ClCompile Include="JsonReader.cpp" />
+    <ClCompile Include="JsonWriter.cpp" />
+    <ClCompile Include="LevelSerializer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ParallaxLayer.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -155,6 +158,9 @@ sfml-audio-d.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-system.li
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="JsonReader.h" />
+    <ClInclude Include="JsonWriter.h" />
+    <ClInclude Include="LevelSerializer.h" />
     <ClInclude Include="ParallaxLayer.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Tile.h" />

@@ -120,4 +120,9 @@ namespace Metroidvania {
             && row >= 0 && row < m_rows;
     }
 
+    const Tile& TileMap::getTile(int col, int row) const
+    {
+        return m_tiles[index(col, row)];
+    }
+
 }

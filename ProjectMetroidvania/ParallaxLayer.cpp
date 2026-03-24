@@ -95,7 +95,7 @@ namespace Metroidvania {
 
     void ParallaxLayer::drawScrollingSprite(
         sf::RenderWindow& window,
-        sf::Sprite sprite,
+        sf::Sprite        sprite,
         float             offset,
         sf::Color         tint) const
     {
@@ -106,18 +106,26 @@ namespace Metroidvania {
 
         sprite.setColor(tint);
 
-        // Draw twice side by side for seamless loop
-        sprite.setPosition(camCentre - halfSize + sf::Vector2f(offset, 0.f));
+        // anchor to top left of screen, shift by offset
+        const sf::Vector2f base = camCentre - halfSize;
+
+        // first copy - offset from base
+        sprite.setPosition(base + sf::Vector2f(offset, 0.f));
         window.draw(sprite);
 
-        sprite.setPosition(camCentre - halfSize + sf::Vector2f(offset - texWidth, 0.f));
+        // second copy - immediately to the left of first
+        // this fills the gap when first copy hasn't reached screen edge yet
+        sprite.setPosition(base + sf::Vector2f(offset - texWidth, 0.f));
         window.draw(sprite);
     }
 
     float ParallaxLayer::wrapOffset(float offset, float width) const
     {
         if (width <= 0.f) return 0.f;
-        return std::fmod(offset, width);
+        // always keep offset in 0..width range
+        float result = std::fmod(offset, width);
+        if (result < 0.f) result += width;
+        return result;
     }
 
 }
