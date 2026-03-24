@@ -3,12 +3,15 @@
 
 namespace Metroidvania {
 
-    DevMode::DevMode(TileMap& bg, TileMap& mg, TileMap& fg, Camera& camera)
+    DevMode::DevMode(TileMap& bg, TileMap& mg, TileMap& fg, 
+        TileMap& parallaxFront, 
+        Camera& camera)
         : m_camera(camera)
     {
         m_layers[0] = &bg;
         m_layers[1] = &mg;
         m_layers[2] = &fg;
+        m_layers[3] = &parallaxFront;
 
         m_ghost.setSize(sf::Vector2f(k_tileSize, k_tileSize));
         m_ghost.setFillColor(sf::Color(255, 255, 255, 60));
@@ -185,6 +188,7 @@ namespace Metroidvania {
         case EditorLayer::Background: return "Background";
         case EditorLayer::Midground:  return "Midground";
         case EditorLayer::Foreground: return "Foreground";
+        case EditorLayer::ParallaxFront: return "Parallax Front";
         default:                      return "Unknown";
         }
     }

@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Camera.h"
 #include "DevMode.h"
+#include "ParallaxLayer.h"
 
 namespace Metroidvania {
 
@@ -26,6 +27,8 @@ namespace Metroidvania {
         TileMap  m_bgLayer;
         TileMap  m_mgLayer;
         TileMap  m_fgLayer;
+
+        ParallaxLayer m_parallax;
 
         DevMode  m_devMode;
         bool     m_devModeActive = false;

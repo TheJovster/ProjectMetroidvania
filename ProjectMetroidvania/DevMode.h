@@ -11,6 +11,7 @@ namespace Metroidvania {
         Background = 0,
         Midground = 1,
         Foreground = 2,
+        ParallaxFront = 3,
         COUNT
     };
 
@@ -24,7 +25,9 @@ namespace Metroidvania {
 
     class DevMode {
     public:
-        DevMode(TileMap& bg, TileMap& mg, TileMap& fg, Camera& camera);
+        DevMode(TileMap& bg, TileMap& mg, TileMap& fg,
+            TileMap& parallaxFront,
+            Camera& camera);
 
         // --- Toggle ---
         void setActive(bool active);

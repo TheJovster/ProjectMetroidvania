@@ -10,7 +10,16 @@ namespace Metroidvania {
         , m_camera(sf::Vector2u(
             sf::VideoMode::getDesktopMode().size.x,
             sf::VideoMode::getDesktopMode().size.y))
-        , m_devMode(m_bgLayer, m_mgLayer, m_fgLayer, m_camera)
+        , m_devMode(m_bgLayer, m_mgLayer, m_fgLayer,
+            m_parallax.getFrontLayer(),
+            m_camera)
+        , m_parallax(
+            sf::Vector2u(
+                sf::VideoMode::getDesktopMode().size.x,
+                sf::VideoMode::getDesktopMode().size.y),
+            "",   // no background texture yet - solid color
+            ""    // no mid texture yet - solid color
+        )
     {
         sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
 
@@ -92,6 +101,9 @@ namespace Metroidvania {
         {
             m_devMode.update(dt, m_window);
         }
+
+        // Parallax always updates regardless of devmode
+        m_parallax.update(m_camera.getPosition());
     }
 
     void Game::render()
@@ -99,7 +111,10 @@ namespace Metroidvania {
         m_camera.apply(m_window);
         m_window.clear(sf::Color::Black);
 
-        // World space - camera view active
+        // Parallax - furthest back
+        m_parallax.draw(m_window);
+
+        // World space layers - camera view active
         m_bgLayer.draw(m_window);
         m_mgLayer.draw(m_window);
         m_player.draw(m_window);

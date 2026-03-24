@@ -101,6 +101,19 @@ namespace Metroidvania {
             tile.draw(window);
     }
 
+    void TileMap::draw(sf::RenderWindow& window, sf::Vector2f offset) const
+    {
+        for (const Tile& tile : m_tiles)
+        {
+            if (tile.type == TileType::Empty) continue;
+
+            // Temporarily offset the tile shape for drawing
+            sf::RectangleShape offsetShape = tile.shape;
+            offsetShape.setPosition(tile.shape.getPosition() + offset);
+            window.draw(offsetShape);
+        }
+    }
+
     bool TileMap::isValid(int col, int row) const
     {
         return col >= 0 && col < m_columns
