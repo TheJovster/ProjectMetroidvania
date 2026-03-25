@@ -9,6 +9,7 @@
 #include "DevMode.h"
 #include "ParallaxLayer.h"
 #include "LevelSerializer.h"
+#include "TextureCache.h"
 
 namespace Metroidvania {
 
@@ -30,7 +31,9 @@ namespace Metroidvania {
         TileMap  m_mgLayer;
         TileMap  m_fgLayer;
 
+        TextureCache m_textureCache;
         Player  m_player;
+
         ParallaxLayer m_parallax;
         DevMode  m_devMode;
         LevelSerializer    m_serializer;

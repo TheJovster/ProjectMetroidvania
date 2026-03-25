@@ -2,8 +2,10 @@
 
 namespace Metroidvania {
 
-    Player::Player(sf::Vector2f position)
-        : Entity(position, sf::Vector2f(64.f, 96.f)) // placeholder size - replace with sprite dims
+    Player::Player(sf::Vector2f position, TextureCache& textureCache)
+        : Entity(position, sf::Vector2f(40.f, 80.f)) // placeholder size - replace with sprite dims
+        , m_textureCache(textureCache)
+        , m_sprite(textureCache.get("assets/animations/characters/gideon/idle/Gideon_idle_01.png"))
     {
         // --- Visual ---
         m_shape.setSize(m_size);
@@ -25,8 +27,30 @@ namespace Metroidvania {
             return clip;
             };
 
-        m_animator.addClip(AnimationState::IdlePassive, makeClip(true, true));
-        m_animator.addClip(AnimationState::Walk, makeClip(true, true));
+        m_animator.addClip(AnimationState::IdlePassive,
+            buildClip("assets/animations/characters/gideon/idle/",
+                "Gideon_idle_", 8, true, 12.f));
+        m_animator.addClip(AnimationState::Walk,
+            buildClip("assets/animations/characters/gideon/walk/",
+                "Gideon_Walk_", 9, true, 12.f));
+
+        m_animator.addClip(AnimationState::JumpAscent,
+            buildClip("assets/animations/characters/gideon/jump/ascent/",
+                "Gideon_Ascent_", 3, false, 12.f));
+
+        m_animator.addClip(AnimationState::JumpApex,
+            buildClip("assets/animations/characters/gideon/jump/apex/",
+                "Gideon_Apex_", 2, true, 12.f));
+
+        m_animator.addClip(AnimationState::Fall,
+            buildClip("assets/animations/characters/gideon/jump/fall/",
+                "Gideon_Fall_", 3, true, 12.f));
+
+        m_animator.addClip(AnimationState::Land,
+            buildClip("assets/animations/characters/gideon/jump/land/",
+                "Gideon_Land_", 2, false, 12.f, false));
+
+/*        m_animator.addClip(AnimationState::Walk, makeClip(true, true));
         m_animator.addClip(AnimationState::Run, makeClip(true, true));
         m_animator.addClip(AnimationState::Turn, makeClip(false, false));  // must complete
         m_animator.addClip(AnimationState::JumpAscent, makeClip(false, true));
@@ -38,7 +62,9 @@ namespace Metroidvania {
         m_animator.addClip(AnimationState::CrouchRise, makeClip(false, false));
         m_animator.addClip(AnimationState::Hurt, makeClip(false, false));  // force only
         m_animator.addClip(AnimationState::Die, makeClip(false, false));  // force only
-        m_animator.addClip(AnimationState::Dead, makeClip(false, false));  // force only
+        m_animator.addClip(AnimationState::Dead, makeClip(false, false));  // force only*/
+
+        m_sprite.setOrigin(sf::Vector2f(48.f, 48.f));
 
         m_animator.setReturnState(AnimationState::IdlePassive);
         m_animator.setFacingRight(true);
@@ -46,18 +72,19 @@ namespace Metroidvania {
 
     void Player::update(float dt, Input& input, const TileMap& tileMap)
     {
+
+        m_wasGrounded = m_grounded;
+
         handleInput(input);
-        applyGravity(dt);
-        applyMovement(dt);
-        resolveCollision(tileMap);
+        applyGravity(dt);     
+        applyMovement(dt);     
+        resolveCollision(tileMap); 
         updateCoyote();
         updateAnimator(input);
         m_animator.update(dt);
     }
 
-    // -------------------------------------------------------
-    // Input
-    // -------------------------------------------------------
+    //Input
     void Player::handleInput(Input& input)
     {
         // --- Turn logic ---
@@ -109,10 +136,10 @@ namespace Metroidvania {
             m_velocity.x = 0.f;
         }
 
-        // --- Crouch ---
+        // Crouch
         m_crouching = input.isHeld(Action::Crouch) && m_grounded;
 
-        // --- Jump ---
+        // Jump
         if (canJump() && input.wasRecentlyPressed(Action::Jump))
         {
             jump();
@@ -120,9 +147,7 @@ namespace Metroidvania {
         }
     }
 
-    // -------------------------------------------------------
-    // Physics
-    // -------------------------------------------------------
+    //Physics
     void Player::applyGravity(float dt)
     {
         if (!m_grounded)
@@ -130,6 +155,7 @@ namespace Metroidvania {
             m_velocity.y += k_gravity * dt;
             m_velocity.y = std::min(m_velocity.y, k_maxFallSpeed);
         }
+        // grounded - do nothing, collision handles position
     }
 
     void Player::applyMovement(float dt)
@@ -138,14 +164,12 @@ namespace Metroidvania {
         m_shape.setPosition(m_position);
     }
 
-    // -------------------------------------------------------
-    // Collision
-    // -------------------------------------------------------
+    //Collision
     void Player::resolveCollision(const TileMap& tileMap)
     {
-        const bool wasGrounded = m_grounded;
         m_grounded = false;
 
+        //X pass
         sf::FloatRect bounds = getBounds();
         auto solidTiles = tileMap.getSolidBounds(bounds);
 
@@ -157,10 +181,8 @@ namespace Metroidvania {
 
             const sf::FloatRect overlap = intersection.value();
 
-            // Resolve on shortest axis
-            if (overlap.size.x < overlap.size.y)
+            if (overlap.size.x <= overlap.size.y)
             {
-                // Horizontal resolution
                 if (m_position.x < tile.position.x)
                     m_position.x -= overlap.size.x;
                 else
@@ -168,36 +190,65 @@ namespace Metroidvania {
 
                 m_velocity.x = 0.f;
             }
-            else
+        }
+
+        //Y pass
+        bounds = getBounds();
+        solidTiles = tileMap.getSolidBounds(bounds);
+
+        for (const sf::FloatRect& tile : solidTiles)
+        {
+            sf::FloatRect playerBounds = getBounds();
+            auto intersection = playerBounds.findIntersection(tile);
+            if (!intersection.has_value()) continue;
+
+            const sf::FloatRect overlap = intersection.value();
+
+            if (overlap.size.y <= overlap.size.x)
             {
-                // Vertical resolution
                 if (m_position.y < tile.position.y)
                 {
-                    // Landing on top of tile
-                    m_position.y -= overlap.size.y;
+                    m_position.y = tile.position.y - m_size.y; // hard snap, no drift
                     m_velocity.y = 0.f;
                     m_grounded = true;
                     m_jumping = false;
                 }
                 else
                 {
-                    // Hitting ceiling
                     m_position.y += overlap.size.y;
                     m_velocity.y = 0.f;
                 }
             }
         }
 
+        // after both passes in resolveCollision, before m_shape.setPosition
+        // probe downward by a small amount to confirm grounding
+        if (!m_grounded)
+        {
+            sf::FloatRect probeRect(
+                sf::Vector2f(m_position.x, m_position.y + 2.f),
+                m_size
+            );
+            auto probeTiles = tileMap.getSolidBounds(probeRect);
+            for (const sf::FloatRect& tile : probeTiles)
+            {
+                auto intersection = probeRect.findIntersection(tile);
+                if (intersection.has_value())
+                {
+                    m_grounded = true;
+                    break;
+                }
+            }
+        }
+
         m_shape.setPosition(m_position);
 
-        // Coyote - just left the ground
-        if (wasGrounded && !m_grounded && !m_jumping)
+        // Coyote time
+        if (!m_grounded && !m_jumping && m_wasGrounded)
             m_coyoteFrames = k_coyoteFrames;
+
     }
 
-    // -------------------------------------------------------
-    // Coyote time
-    // -------------------------------------------------------
     void Player::updateCoyote()
     {
         if (m_coyoteFrames > 0)
@@ -211,9 +262,6 @@ namespace Metroidvania {
         }
     }
 
-    // -------------------------------------------------------
-    // Jump
-    // -------------------------------------------------------
     bool Player::canJump() const
     {
         return m_grounded || m_coyoteAvailable;
@@ -228,27 +276,24 @@ namespace Metroidvania {
         m_coyoteAvailable = false;
     }
 
-    // -------------------------------------------------------
-    // Animator
-    // -------------------------------------------------------
     void Player::updateAnimator(const Input& input)
     {
         const AnimationState current = m_animator.getState();
 
-        // --- Forced states take priority - don't touch these here ---
+        //forced states take priority
         if (current == AnimationState::Die ||
             current == AnimationState::Dead ||
             current == AnimationState::Hurt)
             return;
 
-        // --- Turn ---
+        // Turn
         if (m_turning)
         {
             m_animator.setState(AnimationState::Turn);
             return;
         }
 
-        // --- Airborne ---
+        // Airborne
         if (!m_grounded)
         {
             if (m_velocity.y < -100.f)
@@ -260,7 +305,7 @@ namespace Metroidvania {
             return;
         }
 
-        // --- Grounded ---
+        // Grounded
         if (m_crouching)
         {
             if (current != AnimationState::CrouchIdle &&
@@ -279,10 +324,12 @@ namespace Metroidvania {
             return;
         }
 
-        // Land
-        if (current == AnimationState::Fall ||
-            current == AnimationState::JumpApex ||
-            current == AnimationState::JumpAscent)
+        // if landing animation is playing - let it finish
+        if (current == AnimationState::Land && !m_animator.isComplete())
+            return;
+
+        // only trigger land on the frame we touch ground
+        if (m_grounded && !m_wasGrounded)
         {
             m_animator.setState(AnimationState::Land);
             return;
@@ -298,12 +345,44 @@ namespace Metroidvania {
             m_animator.setState(AnimationState::IdlePassive);
     }
 
-    // -------------------------------------------------------
     // Draw
-    // -------------------------------------------------------
     void Player::draw(sf::RenderWindow& window)
     {
-        window.draw(m_shape);
+        // get current frame path from animator
+        const std::string& framePath = m_animator.getCurrentFrame();
+        if (!framePath.empty())
+        {
+            // look up texture in cache
+            const sf::Texture& texture = m_textureCache.get(framePath);
+            m_sprite.setTexture(texture);
+
+            // flip on X based on facing direction
+            const float scaleX = m_animator.isFacingRight() ? 1.f : -1.f;
+            m_sprite.setScale(sf::Vector2f(scaleX, 1.f));
+
+            // position sprite - origin is centre so offset by half size
+            m_sprite.setPosition(sf::Vector2f(
+                m_position.x + m_size.x * 0.5f,
+                m_position.y + m_size.y * 0.5f
+            ));
+            window.draw(m_sprite);
+
+#ifdef _DEBUG
+            // DEBUG - draw collision box outline
+            sf::RectangleShape debugBox;
+            debugBox.setSize(m_size);
+            debugBox.setPosition(m_position);
+            debugBox.setFillColor(sf::Color::Transparent);
+            debugBox.setOutlineColor(sf::Color::Green);
+            debugBox.setOutlineThickness(1.f);
+            window.draw(debugBox);
+#endif
+        }
+        else
+        {
+            // DEBUG - draw red rectangle if no frame available
+            window.draw(m_shape);
+        }
     }
 
 }

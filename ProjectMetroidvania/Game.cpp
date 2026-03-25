@@ -6,7 +6,7 @@ namespace Metroidvania {
         : m_bgLayer(80, 20)
         , m_mgLayer(80, 20)
         , m_fgLayer(80, 20)
-        , m_player(sf::Vector2f(256.f, 300.f))
+        , m_player(sf::Vector2f(256.f, 0.f), m_textureCache)
         , m_camera(sf::Vector2u(
             sf::VideoMode::getDesktopMode().size.x,
             sf::VideoMode::getDesktopMode().size.y))

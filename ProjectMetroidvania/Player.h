@@ -5,6 +5,9 @@
 #include "Animator.h"
 #include "AbilitySet.h"
 #include "TileMap.h"
+#include "TextureCache.h"
+#include "AnimationHelper.h"
+#include <iostream>
 
 namespace Metroidvania {
 
@@ -17,7 +20,8 @@ namespace Metroidvania {
 
     class Player : public Entity {
     public:
-        explicit Player(sf::Vector2f position);
+        explicit Player(sf::Vector2f position, TextureCache& textureCache);
+
 
         void update(float dt, Input& input, const TileMap& tileMap);
         void draw(sf::RenderWindow& window) override;
@@ -36,6 +40,7 @@ namespace Metroidvania {
         AbilitySet m_abilitySet;
 
         bool  m_grounded = false;
+        bool m_wasGrounded = false;
         bool  m_jumping = false;
         bool  m_crouching = false;
 
@@ -45,6 +50,9 @@ namespace Metroidvania {
         bool  m_turning = false;
         float m_turnTimer = 0.f;
         bool  m_pendingFlip = false; // flip sprite when turn animation completes
+
+        TextureCache& m_textureCache;
+        sf::Sprite    m_sprite;
 
         void handleInput(Input& input);
         void updateAnimator(const Input& input);  
