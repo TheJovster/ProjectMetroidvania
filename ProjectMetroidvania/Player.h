@@ -7,6 +7,7 @@
 #include "TileMap.h"
 #include "TextureCache.h"
 #include "AnimationHelper.h"
+#include "DoubleJumpAbility.h"
 #include <iostream>
 
 namespace Metroidvania {
@@ -52,6 +53,9 @@ namespace Metroidvania {
         bool  m_turning = false;
         float m_turnTimer = 0.f;
         bool  m_pendingFlip = false; // flip sprite when turn animation completes
+        
+        //abilities - later on dependant on Ability Set but exposed here for testing
+        bool m_hasDoubleJump = false;
 
         TextureCache& m_textureCache;
         sf::Sprite    m_sprite;

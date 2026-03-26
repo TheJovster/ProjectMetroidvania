@@ -46,6 +46,10 @@ namespace Metroidvania {
             buildTestLevel();
 
         m_camera.snapTo(m_player.getPosition());
+
+        auto doubleJump = std::make_shared<DoubleJumpAbility>();
+        doubleJump->unlock();
+        m_player.getAbilitySet().assign(AbilitySlot::DoubleJump, doubleJump);
     }
 
     void Game::run()

@@ -29,22 +29,22 @@ namespace Metroidvania {
 
         m_animator.addClip(AnimationState::IdlePassive,
             buildClip("assets/animations/characters/gideon/idle/",
-                "Gideon_idle_", 8, true, 12.f));
+                "Gideon_idle_", 8, true, 6.f));
         m_animator.addClip(AnimationState::Walk,
             buildClip("assets/animations/characters/gideon/walk/",
-                "Gideon_Walk_", 9, true, 12.f));
+                "Gideon_Walk_", 9, true, 6.f));
 
         m_animator.addClip(AnimationState::JumpAscent,
             buildClip("assets/animations/characters/gideon/jump/ascent/",
-                "Gideon_Ascent_", 3, false, 12.f));
+                "Gideon_Ascent_", 3, false, 6.f));
 
         m_animator.addClip(AnimationState::JumpApex,
             buildClip("assets/animations/characters/gideon/jump/apex/",
-                "Gideon_Apex_", 2, true, 12.f));
+                "Gideon_Apex_", 2, true, 6.f));
 
         m_animator.addClip(AnimationState::Fall,
             buildClip("assets/animations/characters/gideon/jump/fall/",
-                "Gideon_Fall_", 3, true, 12.f));
+                "Gideon_Fall_", 3, true, 6.f));
 
         m_animator.addClip(AnimationState::Land,
             buildClip("assets/animations/characters/gideon/jump/land/",
@@ -217,6 +217,7 @@ namespace Metroidvania {
                     m_velocity.y = 0.f;
                     m_grounded = true;
                     m_jumping = false;
+                    m_hasDoubleJump = true;  // restore double jump on land
                 }
                 else
                 {
@@ -269,16 +270,24 @@ namespace Metroidvania {
 
     bool Player::canJump() const
     {
-        return m_grounded || m_coyoteAvailable;
+        if (m_grounded || m_coyoteAvailable) return true;
+        if (m_hasDoubleJump && m_abilitySet.hasUnlocked(AbilitySlot::DoubleJump)) return true;
+        return false;
     }
 
     void Player::jump()
     {
+        const bool isDoubleJump = !m_grounded && !m_coyoteAvailable;
+
+        if (isDoubleJump)
+            m_hasDoubleJump = false;
+
         m_velocity.y = k_playerJumpForce;
         m_jumping = true;
         m_grounded = false;
         m_coyoteFrames = 0;
         m_coyoteAvailable = false;
+        m_jumpHeld = false;
     }
 
     void Player::updateAnimator(const Input& input)

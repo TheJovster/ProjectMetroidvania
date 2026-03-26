@@ -6,7 +6,10 @@ namespace Metroidvania {
 
     Camera::Camera(sf::Vector2u windowSize)
     {
-        m_view.setSize(sf::Vector2f(windowSize));
+        m_view.setSize(sf::Vector2f(
+            windowSize.x * k_cameraZoom,
+            windowSize.y * k_cameraZoom
+        ));
         m_view.setCenter(sf::Vector2f(
             windowSize.x * 0.5f,
             windowSize.y * 0.5f
