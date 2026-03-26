@@ -12,11 +12,13 @@
 namespace Metroidvania {
 
     constexpr float k_playerMoveSpeed = 300.f;
-    constexpr float k_playerJumpForce = -1000.f;
+    constexpr float k_playerJumpForce = -500.f;
     constexpr float k_gravity = 1800.f;
     constexpr float k_maxFallSpeed = 900.f;
     constexpr int   k_coyoteFrames = 6;       // tight - tune during feel pass
     constexpr float k_turnLockDuration = 0.1f;    // seconds the turn animation locks movement
+    constexpr float k_jumpHoldGravityScale = 0.45f;  // gravity multiplier while holding jump - tune during feel pass
+    constexpr float k_jumpHoldMaxVelocity = -200.f; // stop boosting above this velocity - tune during feel pass
 
     class Player : public Entity {
     public:
@@ -63,6 +65,7 @@ namespace Metroidvania {
 
         void jump();
         bool canJump() const;
+        bool m_jumpHeld;
 
         sf::RectangleShape m_shape;
 

@@ -7,7 +7,7 @@
 
 namespace Metroidvania {
 
-    // --- Input buffer depth - start at 10 frames, tune as needed ---
+    // Input buffer depth - start at 10 frames, tune as needed
     constexpr int k_inputBufferDepth = 10;
 
     struct BufferedAction {
@@ -23,19 +23,19 @@ namespace Metroidvania {
         // Called at the END of each frame to age the buffer and reset per-frame state
         void tick();
 
-        // --- Stateful queries ---
+        // Stateful queries
         bool isHeld(Action action) const;
         bool isJustPressed(Action action) const;
         bool isJustReleased(Action action) const;
 
-        // --- Buffer queries ---
+        // Buffer queries
         // Returns true if action was pressed within the last k_inputBufferDepth frames
         bool wasRecentlyPressed(Action action) const;
 
         // Consume a buffered action so it isn't re-read next frame
         void consumeBufferedAction(Action action);
 
-        // --- Mouse ---
+        // Mouse
         sf::Vector2i mousePosition() const { return m_mousePosition; }
         bool isMouseButtonHeld(sf::Mouse::Button button) const;
         bool isMouseButtonPressed(sf::Mouse::Button button) const;

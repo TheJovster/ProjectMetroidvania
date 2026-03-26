@@ -7,13 +7,13 @@ namespace Metroidvania {
         , m_textureCache(textureCache)
         , m_sprite(textureCache.get("assets/animations/characters/gideon/idle/Gideon_idle_01.png"))
     {
-        // --- Visual ---
+        // Visual
         m_shape.setSize(m_size);
         m_shape.setFillColor(sf::Color(180, 60, 60));   // placeholder red
         m_shape.setOutlineColor(sf::Color(220, 100, 100));
         m_shape.setOutlineThickness(1.f);
 
-        // --- Animator setup ---
+        // Animator setup
         // Placeholder clips - single frame each until assets are in
         // Loop = true for sustained states, false for one-shots
 
@@ -87,7 +87,9 @@ namespace Metroidvania {
     //Input
     void Player::handleInput(Input& input)
     {
-        // --- Turn logic ---
+        m_jumpHeld = input.isHeld(Action::Jump);
+
+        // Turn logic
         if (m_turning)
         {
             m_turnTimer -= 1.f / 60.f;
@@ -103,7 +105,7 @@ namespace Metroidvania {
             return; // locked during turn
         }
 
-        // --- Horizontal movement ---
+        // Horizontal movement
         const bool movingLeft = input.isHeld(Action::MoveLeft);
         const bool movingRight = input.isHeld(Action::MoveRight);
 
@@ -147,15 +149,18 @@ namespace Metroidvania {
         }
     }
 
-    //Physics
+    // Physics
     void Player::applyGravity(float dt)
     {
         if (!m_grounded)
         {
-            m_velocity.y += k_gravity * dt;
+            // reduce gravity while holding jump and still ascending - gives floaty SotN arc
+            const bool floating = m_jumpHeld && m_jumping && m_velocity.y < k_jumpHoldMaxVelocity;
+            const float gravityScale = floating ? k_jumpHoldGravityScale : 1.f;
+
+            m_velocity.y += k_gravity * gravityScale * dt;
             m_velocity.y = std::min(m_velocity.y, k_maxFallSpeed);
         }
-        // grounded - do nothing, collision handles position
     }
 
     void Player::applyMovement(float dt)
@@ -368,7 +373,7 @@ namespace Metroidvania {
             window.draw(m_sprite);
 
 #ifdef _DEBUG
-            // DEBUG - draw collision box outline
+            // DEBUG - draw collision box outline - visualise trigger
             sf::RectangleShape debugBox;
             debugBox.setSize(m_size);
             debugBox.setPosition(m_position);

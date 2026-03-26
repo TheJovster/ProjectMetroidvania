@@ -37,13 +37,13 @@ namespace Metroidvania {
             }
         }
 
-        // --- Mouse position ---
+        // Mouse position
         if (const auto* mouseMoved = event.getIf<sf::Event::MouseMoved>())
         {
             m_mousePosition = sf::Vector2i(mouseMoved->position.x, mouseMoved->position.y);
         }
 
-        // --- Mouse buttons ---
+        // Mouse buttons
         if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>())
         {
             const int idx = static_cast<int>(mousePressed->button);
@@ -135,24 +135,24 @@ namespace Metroidvania {
     {
         switch (key)
         {
-            // --- Movement ---
+        // Movement
         case sf::Keyboard::Key::A:      return Action::MoveLeft;
         case sf::Keyboard::Key::D:      return Action::MoveRight;
         case sf::Keyboard::Key::S:      return Action::Crouch;
         case sf::Keyboard::Key::Space:  return Action::Jump;
 
-            // --- Combat ---
+        // Combat
         case sf::Keyboard::Key::J:      return Action::AttackPrimary;
         case sf::Keyboard::Key::K:      return Action::AttackSecondary;
 
-            // --- Abilities ---
+        // Abilities
         case sf::Keyboard::Key::U:      return Action::AbilityPrimary;
         case sf::Keyboard::Key::I:      return Action::AbilitySecondary;
 
-            // --- Interaction ---
+        // Interaction
         case sf::Keyboard::Key::E:      return Action::Interact;
 
-            // --- Meta ---
+        // Meta
         case sf::Keyboard::Key::Escape: return Action::Pause;
 
         default: return std::nullopt;
