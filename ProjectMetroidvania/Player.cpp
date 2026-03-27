@@ -30,6 +30,7 @@ namespace Metroidvania {
         m_animator.addClip(AnimationState::IdlePassive,
             buildClip("assets/animations/characters/gideon/idle/",
                 "Gideon_idle_", 8, true, 6.f));
+
         m_animator.addClip(AnimationState::Walk,
             buildClip("assets/animations/characters/gideon/walk/",
                 "Gideon_Walk_", 9, true, 6.f));
@@ -49,6 +50,14 @@ namespace Metroidvania {
         m_animator.addClip(AnimationState::Land,
             buildClip("assets/animations/characters/gideon/jump/land/",
                 "Gideon_Land_", 2, false, 12.f, false));
+        
+        m_animator.addClip(AnimationState::AttackPrimary,
+            buildClip("assets/animations/characters/gideon/attack/",
+                "Gideon_Attack_", 8, false, 12.0f, false));
+
+        m_animator.addClip(AnimationState::AttackAir,
+            buildClip("assets/animations/characters/gideon/airattack/",
+            "Gideon_AirAttack_", 8, false, 12.0f, false));
 
 /*        m_animator.addClip(AnimationState::Walk, makeClip(true, true));
         m_animator.addClip(AnimationState::Run, makeClip(true, true));
@@ -306,6 +315,21 @@ namespace Metroidvania {
             m_animator.setState(AnimationState::Turn);
             return;
         }
+
+        // Attack - check before airborne so air attack can trigger
+        if (input.isJustPressed(Action::AttackPrimary))
+        {
+            if (m_grounded)
+                m_animator.setState(AnimationState::AttackPrimary);
+            else
+                m_animator.setState(AnimationState::AttackAir);
+            return;
+        }
+
+        // if attack is playing - let it finish
+        if ((current == AnimationState::AttackPrimary ||
+            current == AnimationState::AttackAir) && !m_animator.isComplete())
+            return;
 
         // Airborne
         if (!m_grounded)

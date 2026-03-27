@@ -78,7 +78,7 @@ namespace Metroidvania {
             if (const auto* key = event->getIf<sf::Event::KeyPressed>())
             {
                 if (key->code == sf::Keyboard::Key::Escape)
-                    m_window.close();
+                    m_window.close(); //temporary - insert pause here later
 
                 // Toggle DevMode
                 if (key->code == sf::Keyboard::Key::F1)
