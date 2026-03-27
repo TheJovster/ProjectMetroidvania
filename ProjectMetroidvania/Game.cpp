@@ -108,12 +108,41 @@ namespace Metroidvania {
     {
         if (!m_devModeActive)
         {
+            //update player
             m_player.update(dt, m_input, m_mgLayer);
             m_camera.update(
                 dt,
                 m_player.getPosition(),
                 m_player.getAnimator().isFacingRight()
             );
+
+            // update enemies
+            for (auto& enemy : m_enemies)
+                enemy.update(dt, m_mgLayer, m_player.getPosition());
+
+            // remove dead enemies
+            m_enemies.erase(
+                std::remove_if(m_enemies.begin(), m_enemies.end(),
+                    [](const Enemy& e) { return !e.isAlive(); }),
+                m_enemies.end()
+            );
+
+            const auto hitbox = m_player.getAttackHitbox();
+            if (hitbox.has_value() && !m_player.hasHit())
+            {
+                for (auto& enemy : m_enemies)
+                {
+                    if (!enemy.isAlive()) continue;
+
+                    auto intersection = hitbox->findIntersection(enemy.getBounds());
+                    if (intersection.has_value())
+                    {
+                        enemy.takeDamage(1);
+                        m_player.setHasHit(true);  // one hit per swing
+                        break;
+                    }
+                }
+            }
         }
         else
         {
@@ -135,6 +164,14 @@ namespace Metroidvania {
         // World space layers - camera view active
         m_bgLayer.draw(m_window);
         m_mgLayer.draw(m_window);
+
+        // draw enemies
+        for (auto& enemy : m_enemies)
+            enemy.draw(m_window);
+
+        m_player.draw(m_window);
+        m_fgLayer.draw(m_window);
+
         m_player.draw(m_window);
         m_fgLayer.draw(m_window);
         m_devMode.drawWorld(m_window);
@@ -173,6 +210,9 @@ namespace Metroidvania {
         m_mgLayer.buildRow(15, 20, 24, TileType::Stone);
         m_mgLayer.buildRow(15, 44, 48, TileType::Stone);
         m_mgLayer.buildRow(15, 62, 66, TileType::Stone);
+
+        m_enemies.emplace_back(sf::Vector2f(600.f, 300.f));
+
     }
 
     void Game::saveLevel()

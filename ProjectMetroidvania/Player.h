@@ -1,5 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <iostream>
+#include <optional>
 #include "Entity.h"
 #include "Input.h"
 #include "Animator.h"
@@ -8,14 +10,17 @@
 #include "TextureCache.h"
 #include "AnimationHelper.h"
 #include "DoubleJumpAbility.h"
-#include <iostream>
+#include "PhysicsConstants.h"
+
 
 namespace Metroidvania {
 
+    constexpr float k_attackHitboxWidth = 30.f;
+    constexpr float k_attackHitboxHeight = 80.f;
+
     constexpr float k_playerMoveSpeed = 300.f;
     constexpr float k_playerJumpForce = -500.f;
-    constexpr float k_gravity = 1800.f;
-    constexpr float k_maxFallSpeed = 900.f;
+
     constexpr int   k_coyoteFrames = 6;       // tight - tune during feel pass
     constexpr float k_turnLockDuration = 0.1f;    // seconds the turn animation locks movement
     constexpr float k_jumpHoldGravityScale = 0.45f;  // gravity multiplier while holding jump - tune during feel pass
@@ -38,6 +43,11 @@ namespace Metroidvania {
 
         AbilitySet& getAbilitySet() { return m_abilitySet; }
 
+        std::optional<sf::FloatRect> getAttackHitbox() const;
+
+        bool  hasHit()    const { return m_hasHit; }
+        void  setHasHit(bool val) { m_hasHit = val; }
+
     private:
         Animator m_animator;
         AbilitySet m_abilitySet;
@@ -53,7 +63,9 @@ namespace Metroidvania {
         bool  m_turning = false;
         float m_turnTimer = 0.f;
         bool  m_pendingFlip = false; // flip sprite when turn animation completes
-        
+
+        bool m_hasHit = false;
+
         //abilities - later on dependant on Ability Set but exposed here for testing
         bool m_hasDoubleJump = false;
 

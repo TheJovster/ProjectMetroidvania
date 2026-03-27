@@ -319,6 +319,7 @@ namespace Metroidvania {
         // Attack - check before airborne so air attack can trigger
         if (input.isJustPressed(Action::AttackPrimary))
         {
+            m_hasHit = false;
             if (m_grounded)
                 m_animator.setState(AnimationState::AttackPrimary);
             else
@@ -414,6 +415,19 @@ namespace Metroidvania {
             debugBox.setOutlineColor(sf::Color::Green);
             debugBox.setOutlineThickness(1.f);
             window.draw(debugBox);
+            
+            // draw attack hitbox
+            const auto hitbox = getAttackHitbox();
+            if (hitbox.has_value())
+            {
+                sf::RectangleShape hitboxShape;
+                hitboxShape.setSize(hitbox->size);
+                hitboxShape.setPosition(hitbox->position);
+                hitboxShape.setFillColor(sf::Color(255, 0, 0, 60));
+                hitboxShape.setOutlineColor(sf::Color::Red);
+                hitboxShape.setOutlineThickness(1.f);
+                window.draw(hitboxShape);
+            }
 #endif
         }
         else
@@ -421,6 +435,31 @@ namespace Metroidvania {
             // DEBUG - draw red rectangle if no frame available
             window.draw(m_shape);
         }
+    }
+
+    std::optional<sf::FloatRect> Player::getAttackHitbox() const
+    {
+        const AnimationState current = m_animator.getState();
+
+        // only active during attack states
+        if (current != AnimationState::AttackPrimary &&
+            current != AnimationState::AttackAir)
+            return std::nullopt;
+
+        // only active during frames 3-6 (index 2-5)
+        const int frame = m_animator.getCurrentFrameIndex();
+        if (frame < 2 || frame > 5)
+            return std::nullopt;
+
+        // position hitbox just outside Gideon in facing direction
+        const float x = m_animator.isFacingRight()
+            ? m_position.x + (m_size.x * 0.5f) + k_attackHitboxWidth
+            : m_position.x - (m_size.x * 0.5f) - k_attackHitboxWidth;
+
+        return sf::FloatRect(
+            sf::Vector2f(x, m_position.y),
+            sf::Vector2f(k_attackHitboxWidth, k_attackHitboxHeight)
+        );
     }
 
 }

@@ -10,6 +10,8 @@
 #include "ParallaxLayer.h"
 #include "LevelSerializer.h"
 #include "TextureCache.h"
+#include "Enemy.h"
+#include <vector>
 
 namespace Metroidvania {
 
@@ -21,6 +23,8 @@ namespace Metroidvania {
         void run();
 
     private:
+        std::vector<Enemy> m_enemies;
+
         sf::RenderWindow m_window;
         sf::Clock        m_clock;
 
