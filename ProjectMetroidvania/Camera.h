@@ -9,11 +9,11 @@ namespace Metroidvania {
         Transition      // sliding from one room to another
     };
 
-    // --- Tuning constants ---
+    // Tuning constants
     constexpr float k_cameraLerpSpeed = 5.f;     // higher = snappier follow, tune during feel pass
     constexpr float k_cameraLookAhead = 80.f;    // pixels ahead of player in movement direction
     constexpr float k_transitionSpeed = 800.f;   // pixels per second during room transition
-    constexpr float k_cameraZoom = 0.4f;
+    constexpr float k_cameraZoom = 0.3f;
 
     class Camera {
     public:

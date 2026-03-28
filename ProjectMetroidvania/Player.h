@@ -26,6 +26,12 @@ namespace Metroidvania {
     constexpr float k_jumpHoldGravityScale = 0.45f;  // gravity multiplier while holding jump - tune during feel pass
     constexpr float k_jumpHoldMaxVelocity = -200.f; // stop boosting above this velocity - tune during feel pass
 
+    enum class JumpState {
+        Grounded,
+        FirstJump,
+        SecondJump
+    };
+
     class Player : public Entity {
     public:
         explicit Player(sf::Vector2f position, TextureCache& textureCache);
@@ -35,7 +41,7 @@ namespace Metroidvania {
         void draw(sf::RenderWindow& window) override;
 
         bool isGrounded()    const { return m_grounded; }
-        bool isJumping()     const { return m_jumping; }
+        JumpState isJumping()     const { return m_jumpState; }
         bool isTurning()     const { return m_turning; }
         bool isCrouching()   const { return m_crouching; }
 
@@ -54,7 +60,7 @@ namespace Metroidvania {
 
         bool  m_grounded = false;
         bool m_wasGrounded = false;
-        bool  m_jumping = false;
+        JumpState m_jumpState = JumpState::Grounded;
         bool  m_crouching = false;
 
         int   m_coyoteFrames = 0;     // counts down from k_coyoteFrames

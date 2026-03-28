@@ -163,9 +163,12 @@ namespace Metroidvania {
     {
         if (!m_grounded)
         {
-            // reduce gravity while holding jump and still ascending - gives floaty SotN arc
-            const bool floating = m_jumpHeld && m_jumping && m_velocity.y < k_jumpHoldMaxVelocity;
-            const float gravityScale = floating ? k_jumpHoldGravityScale : 1.f;
+            // variable height only on first jump
+            const bool canScale = m_jumpHeld
+                && m_jumpState == JumpState::FirstJump
+                && m_velocity.y < k_jumpHoldMaxVelocity;
+
+            const float gravityScale = canScale ? k_jumpHoldGravityScale : 1.f;
 
             m_velocity.y += k_gravity * gravityScale * dt;
             m_velocity.y = std::min(m_velocity.y, k_maxFallSpeed);
@@ -225,7 +228,7 @@ namespace Metroidvania {
                     m_position.y = tile.position.y - m_size.y; // hard snap, no drift
                     m_velocity.y = 0.f;
                     m_grounded = true;
-                    m_jumping = false;
+                    m_jumpState = JumpState::Grounded;
                     m_hasDoubleJump = true;  // restore double jump on land
                 }
                 else
@@ -259,9 +262,8 @@ namespace Metroidvania {
         m_shape.setPosition(m_position);
 
         // Coyote time
-        if (!m_grounded && !m_jumping && m_wasGrounded)
+        if (!m_grounded && m_jumpState == JumpState::Grounded && m_wasGrounded)
             m_coyoteFrames = k_coyoteFrames;
-
     }
 
     void Player::updateCoyote()
@@ -279,8 +281,16 @@ namespace Metroidvania {
 
     bool Player::canJump() const
     {
-        if (m_grounded || m_coyoteAvailable) return true;
-        if (m_hasDoubleJump && m_abilitySet.hasUnlocked(AbilitySlot::DoubleJump)) return true;
+        // grounded or coyote - first jump available
+        if (m_grounded || m_coyoteAvailable)
+            return true;
+
+        // double jump - only from FirstJump, never from SecondJump
+        if (m_jumpState == JumpState::FirstJump &&
+            m_hasDoubleJump &&
+            m_abilitySet.hasUnlocked(AbilitySlot::DoubleJump))
+            return true;
+
         return false;
     }
 
@@ -289,14 +299,22 @@ namespace Metroidvania {
         const bool isDoubleJump = !m_grounded && !m_coyoteAvailable;
 
         if (isDoubleJump)
+        {
+            m_jumpState = JumpState::SecondJump;
             m_hasDoubleJump = false;
+            m_velocity.y = k_playerJumpForce;
+            m_jumpHeld = false; // ignore hold on second jump
+        }
+        else
+        {
+            m_jumpState = JumpState::FirstJump;
+            m_velocity.y = k_playerJumpForce;
+            m_jumpHeld = false; // reset so hold scaling starts fresh
+        }
 
-        m_velocity.y = k_playerJumpForce;
-        m_jumping = true;
         m_grounded = false;
         m_coyoteFrames = 0;
         m_coyoteAvailable = false;
-        m_jumpHeld = false;
     }
 
     void Player::updateAnimator(const Input& input)
