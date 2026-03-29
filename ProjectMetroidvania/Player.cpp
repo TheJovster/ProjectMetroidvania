@@ -3,12 +3,13 @@
 namespace Metroidvania {
 
     Player::Player(sf::Vector2f position, TextureCache& textureCache)
-        : Entity(position, sf::Vector2f(40.f, 80.f)) // placeholder size - replace with sprite dims
+        : Entity(position, sf::Vector2f(35.f, 80.f)) // placeholder size - replace with sprite dims
         , m_textureCache(textureCache)
         , m_sprite(textureCache.get("assets/animations/characters/gideon/idle/Gideon_idle_01.png"))
     {
         // Visual
-        m_shape.setSize(m_size);
+        m_position.x + m_size.x * 0.5f,
+            m_position.y + m_size.y * 0.5f + k_colliderBottomOffset;
         m_shape.setFillColor(sf::Color(180, 60, 60));   // placeholder red
         m_shape.setOutlineColor(sf::Color(220, 100, 100));
         m_shape.setOutlineThickness(1.f);

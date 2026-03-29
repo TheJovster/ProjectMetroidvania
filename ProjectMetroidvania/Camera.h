@@ -15,6 +15,8 @@ namespace Metroidvania {
     constexpr float k_transitionSpeed = 800.f;   // pixels per second during room transition
     constexpr float k_cameraZoom = 0.3f;
 
+
+
     class Camera {
     public:
         explicit Camera(sf::Vector2u windowSize);

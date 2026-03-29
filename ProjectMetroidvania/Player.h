@@ -26,6 +26,8 @@ namespace Metroidvania {
     constexpr float k_jumpHoldGravityScale = 0.45f;  // gravity multiplier while holding jump - tune during feel pass
     constexpr float k_jumpHoldMaxVelocity = -200.f; // stop boosting above this velocity - tune during feel pass
 
+    constexpr float k_colliderBottomOffset = 0.f;  // pixels sprite extends below collider bottom - tune as needed
+
     enum class JumpState {
         Grounded,
         FirstJump,
