@@ -147,6 +147,7 @@ sfml-audio-d.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-system.li
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ParallaxLayer.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PhysicsBody.cpp" />
     <ClCompile Include="TextureCache.cpp" />
     <ClCompile Include="Tile.cpp" />
     <ClCompile Include="TileMap.cpp" />
@@ -158,6 +159,7 @@ sfml-audio-d.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-system.li
     <ClInclude Include="AnimationState.h" />
     <ClInclude Include="Animator.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CombatComponent.h" />
     <ClInclude Include="DevMode.h" />
     <ClInclude Include="DoubleJumpAbility.h" />
     <ClInclude Include="Enemy.h" />
@@ -170,6 +172,7 @@ sfml-audio-d.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-system.li
     <ClInclude Include="ParallaxLayer.h" />
     <ClInclude Include="PhysicsConstants.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PhysicsBody.h" />
     <ClInclude Include="TextureCache.h" />
     <ClInclude Include="Tile.h" />
     <ClInclude Include="TileMap.h" />

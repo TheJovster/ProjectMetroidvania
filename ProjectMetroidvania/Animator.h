@@ -20,30 +20,36 @@ namespace Metroidvania {
 
         void addClip(AnimationState state, AnimationClip clip);
 
-        // --- State control ---
+        //state control
         void setState(AnimationState state);  // respects interrupt rules
         void forceState(AnimationState state);  // bypasses interrupt rules - for Hurt, Die etc.
         void setReturnState(AnimationState state); // where non-looping clips return to when complete
 
-        // --- Update ---
+        //update
         void update(float dt);
 
-        // --- Queries ---
+        //queries
         const std::string& getCurrentFrame() const;
         AnimationState     getState()        const { return m_currentState; }
         bool               isComplete()      const { return m_complete; }
         bool               isInterruptible() const;
         int                getCurrentFrameIndex() const { return m_frameIndex; }
 
-        // --- Flip ---
+        //flip
         bool isFacingRight()  const { return m_facingRight; }
         void setFacingRight(bool facingRight) { m_facingRight = facingRight; }
+
+        bool           justCompleted()         const { return m_justCompleted; }
+        AnimationState getLastCompletedState() const { return m_lastCompletedState; }
 
     private:
         std::unordered_map<AnimationState, AnimationClip> m_clips;
 
         AnimationState m_currentState = AnimationState::IdlePassive;
         AnimationState m_returnState = AnimationState::IdlePassive;
+
+        bool           m_justCompleted = false;
+        AnimationState m_lastCompletedState = AnimationState::IdlePassive;
 
         int   m_frameIndex = 0;
         float m_elapsed = 0.f;

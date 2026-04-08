@@ -42,7 +42,7 @@ namespace Metroidvania {
         bool  m_flashing = false;
         float m_flashTimer = 0.f;
 
-        // --- Patrol points ---
+        //patrol points
         sf::Vector2f m_patrolLeft;
         sf::Vector2f m_patrolRight;
         sf::Vector2f m_currentTarget;
@@ -63,7 +63,6 @@ namespace Metroidvania {
         void updateAggro(float dt, const TileMap& tileMap, sf::Vector2f playerPosition);
         void updateAI(sf::Vector2f playerPosition);
         void moveToward(sf::Vector2f target, float dt);
-        void resolveCollision(const TileMap& tileMap);
         bool detectPlayer(sf::Vector2f playerPosition) const;
         bool deaggroPlayer(sf::Vector2f playerPosition) const;
     };

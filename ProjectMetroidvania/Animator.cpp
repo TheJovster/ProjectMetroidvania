@@ -61,6 +61,8 @@ namespace Metroidvania {
 
     void Animator::update(float dt)
     {
+        m_justCompleted = false;  // clear each frame
+
         auto it = m_clips.find(m_currentState);
         if (it == m_clips.end()) return;
 
@@ -86,11 +88,10 @@ namespace Metroidvania {
                 }
                 else
                 {
-                    // Hold last frame, mark complete, return to return state
                     m_frameIndex = static_cast<int>(clip.frames.size()) - 1;
                     m_complete = true;
-
-                    // Auto-transition to return state
+                    m_lastCompletedState = m_currentState;  // save before auto-return
+                    m_justCompleted = true;
                     m_currentState = m_returnState;
                     m_frameIndex = 0;
                     m_elapsed = 0.f;

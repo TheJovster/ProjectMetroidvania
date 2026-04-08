@@ -10,6 +10,7 @@
 #include "TextureCache.h"
 #include "AnimationHelper.h"
 #include "DoubleJumpAbility.h"
+#include "CombatComponent.h"
 #include "PhysicsConstants.h"
 
 
@@ -59,6 +60,7 @@ namespace Metroidvania {
     private:
         Animator m_animator;
         AbilitySet m_abilitySet;
+		CombatComponent m_combatComponent;
 
         bool  m_grounded = false;
         bool m_wasGrounded = false;
@@ -80,13 +82,9 @@ namespace Metroidvania {
         TextureCache& m_textureCache;
         sf::Sprite    m_sprite;
 
-        void handleInput(Input& input);
         void updateAnimator(const Input& input);  
-        void applyGravity(float dt);
-        void applyMovement(float dt);
-        void resolveCollision(const TileMap& tileMap);
         void updateCoyote();
-
+		void handleInput(Input& input);
         void jump();
         bool canJump() const;
         bool m_jumpHeld;
