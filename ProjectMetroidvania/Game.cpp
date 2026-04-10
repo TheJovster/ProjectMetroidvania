@@ -116,6 +116,13 @@ namespace Metroidvania {
                 m_player.getAnimator().isFacingRight()
             );
 
+            // HUD
+            m_hud.update(
+                m_player.getHealth(),
+                m_player.getMaxHealth(),
+                1, 1  // full MP to verify color
+            );
+
             // update enemies
             for (auto& enemy : m_enemies)
                 enemy.update(dt, m_mgLayer, m_player.getPosition());
@@ -182,6 +189,15 @@ namespace Metroidvania {
         // Reapply camera view after HUD so nothing else draws in screen space
         m_camera.apply(m_window);
 
+        //screen space
+        m_devMode.drawHUD(m_window);
+
+        //reset to default view for HUD
+        sf::View defaultView = m_window.getDefaultView();
+        m_window.setView(defaultView);
+        m_hud.draw(m_window);
+
+        m_camera.apply(m_window);
         m_window.display();
     }
 

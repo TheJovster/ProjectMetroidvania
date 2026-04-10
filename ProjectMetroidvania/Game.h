@@ -12,6 +12,8 @@
 #include "TextureCache.h"
 #include "Enemy.h"
 #include <vector>
+#include "HUD.h"
+
 
 namespace Metroidvania {
 
@@ -41,6 +43,8 @@ namespace Metroidvania {
         ParallaxLayer m_parallax;
         DevMode  m_devMode;
         LevelSerializer    m_serializer;
+
+		HUD m_hud;
 
         bool     m_devModeActive = false;
         std::string        m_levelName = "test_level";

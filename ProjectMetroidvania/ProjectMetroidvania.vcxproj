@@ -140,6 +140,7 @@ sfml-audio-d.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-system.li
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="HUD.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="JsonReader.cpp" />
     <ClCompile Include="JsonWriter.cpp" />
@@ -165,6 +166,7 @@ sfml-audio-d.lib;sfml-graphics.lib;sfml-window.lib;sfml-audio.lib;sfml-system.li
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="HUD.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="JsonReader.h" />
     <ClInclude Include="JsonWriter.h" />

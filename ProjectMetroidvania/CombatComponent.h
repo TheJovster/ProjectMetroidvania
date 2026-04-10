@@ -12,7 +12,7 @@ namespace Metroidvania {
 
         //setters
         void setIsAttacking(bool value) { m_isAttacking = value; }
-        void setCanAttack(bool value) { m_canAttack = value; }
+        void setCanAttack(bool value) { m_canAttack = value;}
 
     private:
         bool m_isAttacking = false;

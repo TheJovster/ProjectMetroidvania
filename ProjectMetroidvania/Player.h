@@ -43,7 +43,6 @@ namespace Metroidvania {
         void update(float dt, Input& input, const TileMap& tileMap);
         void draw(sf::RenderWindow& window) override;
 
-        bool isGrounded()    const { return m_grounded; }
         JumpState isJumping()     const { return m_jumpState; }
         bool isTurning()     const { return m_turning; }
         bool isCrouching()   const { return m_crouching; }
@@ -57,12 +56,14 @@ namespace Metroidvania {
         bool  hasHit()    const { return m_hasHit; }
         void  setHasHit(bool val) { m_hasHit = val; }
 
+        int getHealth()    const { return m_health; }
+        int getMaxHealth() const { return m_maxHealth; }
+
     private:
         Animator m_animator;
         AbilitySet m_abilitySet;
 		CombatComponent m_combatComponent;
 
-        bool  m_grounded = false;
         bool m_wasGrounded = false;
         JumpState m_jumpState = JumpState::Grounded;
         bool  m_crouching = false;
@@ -81,6 +82,9 @@ namespace Metroidvania {
 
         TextureCache& m_textureCache;
         sf::Sprite    m_sprite;
+
+        int m_health = 10;
+        int m_maxHealth = 10;
 
         void updateAnimator(const Input& input);  
         void updateCoyote();

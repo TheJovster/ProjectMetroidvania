@@ -96,7 +96,14 @@ namespace Metroidvania {
         {
             m_jumpState = JumpState::Grounded;
             m_hasDoubleJump = true;
+
+            if (m_combatComponent.getIsAttacking())
+            {
+                m_combatComponent.setIsAttacking(false);
+                m_combatComponent.setCanAttack(true);
+            }
         }
+
 
         //coyote - only when walked off edge, not jumped off
         if (!m_physicsBody.isGrounded() &&
@@ -180,14 +187,6 @@ namespace Metroidvania {
             jump();
             input.consumeBufferedAction(Action::Jump);
         }
-
-        //attack
-        if (input.isJustPressed(Action::AttackPrimary) && m_combatComponent.getCanAttack())
-        {
-            m_combatComponent.setIsAttacking(true);
-            m_combatComponent.setCanAttack(false);
-            m_hasHit = false;
-        }
     }
 
     void Player::updateCoyote()
@@ -256,11 +255,24 @@ namespace Metroidvania {
             return;
         }
 
-        // Attack
-        if (input.isJustPressed(Action::AttackPrimary))
+        if (m_physicsBody.isGrounded() && !m_wasGrounded)
         {
+            // cancel attack if landing mid-swing
+            m_combatComponent.setIsAttacking(false);
+            m_combatComponent.setCanAttack(true);
+            m_animator.setState(AnimationState::Land);
+            return;
+        }
+
+        // Attack
+        if (input.isJustPressed(Action::AttackPrimary) && m_combatComponent.getCanAttack())
+        {
+
+            m_combatComponent.setIsAttacking(true);
+            m_combatComponent.setCanAttack(false);
             m_hasHit = false;
-            if (m_physicsBody.isGrounded())        // was m_grounded
+
+            if (m_physicsBody.isGrounded())
                 m_animator.setState(AnimationState::AttackPrimary);
             else
                 m_animator.setState(AnimationState::AttackAir);
@@ -270,7 +282,9 @@ namespace Metroidvania {
         // if attack is playing - let it finish
         if ((current == AnimationState::AttackPrimary ||
             current == AnimationState::AttackAir) && !m_animator.isComplete())
+        {
             return;
+        }
 
         //Airborne states
         if (!m_physicsBody.isGrounded())           // was !m_grounded
@@ -285,13 +299,6 @@ namespace Metroidvania {
         }
 
         m_crouching = input.isHeld(Action::Crouch) && m_physicsBody.isGrounded();
-
-        // Land trigger
-        if (m_physicsBody.isGrounded() && !m_wasGrounded)  // was m_grounded && !m_wasGrounded
-        {
-            m_animator.setState(AnimationState::Land);
-            return;
-        }
 
         // Grounded
         if (m_crouching)
@@ -315,6 +322,8 @@ namespace Metroidvania {
         // if landing animation is playing - let it finish
         if (current == AnimationState::Land && !m_animator.isComplete())
             return;
+
+
 
         // only trigger land on the frame we touch ground
         if (m_physicsBody.isGrounded() && !m_wasGrounded)
