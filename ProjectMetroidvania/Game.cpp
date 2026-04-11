@@ -2,6 +2,13 @@
 
 namespace Metroidvania {
 
+    static sf::Font loadFont()
+    {
+        sf::Font font;
+        font.openFromFile("assets/fonts/default.ttf");
+        return font;
+    }
+
     Game::Game()
         : m_bgLayer(80, 20)
         , m_mgLayer(80, 20)
@@ -20,6 +27,13 @@ namespace Metroidvania {
         , m_devMode(m_bgLayer, m_mgLayer, m_fgLayer,
             m_parallax.getFrontLayer(),
             m_camera)
+		, m_font(loadFont())
+        , m_pauseMenu(sf::Vector2u(
+            sf::VideoMode::getDesktopMode().size.x,
+            sf::VideoMode::getDesktopMode().size.y), m_font)
+        , m_mainMenu(sf::Vector2u(
+            sf::VideoMode::getDesktopMode().size.x,
+            sf::VideoMode::getDesktopMode().size.y), m_font)
     {
         sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
 
@@ -30,7 +44,7 @@ namespace Metroidvania {
         );
 
         m_window.setFramerateLimit(60);
-        m_window.setMouseCursorVisible(false);
+        m_window.setMouseCursorVisible(true);
 
         m_camera.setRoomBounds(sf::FloatRect(
             { 0.f, 0.f },
@@ -77,28 +91,76 @@ namespace Metroidvania {
 
             if (const auto* key = event->getIf<sf::Event::KeyPressed>())
             {
-                if (key->code == sf::Keyboard::Key::Escape)
-                    m_window.close(); //temporary - insert pause here later
-
-                // Toggle DevMode
-                if (key->code == sf::Keyboard::Key::F1)
+                if (m_gameState == GameState::Playing)
                 {
-                    m_devModeActive = !m_devModeActive;
-                    m_devMode.setActive(m_devModeActive);
-                    m_window.setMouseCursorVisible(m_devModeActive);
-                }
+                    //escape pauses
+                    if (key->code == sf::Keyboard::Key::Escape)
+                    {
+                        m_gameState = GameState::Paused;
+                        m_pauseMenu.reset();
+                        m_window.setMouseCursorVisible(true);
 
-                // ctrl+s saves the level
-                if (key->code == sf::Keyboard::Key::S)
-                {
-                    const bool ctrl = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl)
-                        || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl);
-                    if (ctrl)
-                        saveLevel();
+                    }
+
+                    //F1 toggles devmode
+                    if (key->code == sf::Keyboard::Key::F1)
+                    {
+                        m_devModeActive = !m_devModeActive;
+                        m_devMode.setActive(m_devModeActive);
+                        m_window.setMouseCursorVisible(m_devModeActive);
+                    }
+
+                    //ctrl+s saves
+                    if (key->code == sf::Keyboard::Key::S)
+                    {
+                        const bool ctrl = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LControl)
+                            || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::RControl);
+                        if (ctrl) saveLevel();
+                    }
                 }
             }
 
-            // Feed events to DevMode when active
+            //pause menu events
+            if (m_gameState == GameState::Paused)
+            {
+                const sf::Vector2f mousePos = sf::Vector2f(m_input.mousePosition());
+                const bool mouseClicked = m_input.isMouseButtonPressed(sf::Mouse::Button::Left);
+
+                const PauseAction action = m_pauseMenu.update(*event, mousePos, mouseClicked);
+                std::cout << "PauseAction: " << (int)action << "\n";
+
+                if (action == PauseAction::Resume)
+                {
+                    m_gameState = GameState::Playing;
+                    m_window.setMouseCursorVisible(false);
+                }
+                else if (action == PauseAction::QuitToMenu)
+                {
+                    resetGame();
+                    m_gameState = GameState::MainMenu;
+                    m_mainMenu.reset();
+                    m_window.setMouseCursorVisible(true);
+                }
+            }
+
+            //main menu events
+            else if (m_gameState == GameState::MainMenu)
+            {
+                const sf::Vector2f mousePos = sf::Vector2f(m_input.mousePosition());
+                const bool mouseClicked = m_input.isMouseButtonPressed(sf::Mouse::Button::Left);
+
+                const MainMenuAction action = m_mainMenu.update(*event, mousePos, mouseClicked);
+
+                if (action == MainMenuAction::StartGame)
+                {
+					resetGame();
+                    m_gameState = GameState::Playing;
+                    m_window.setMouseCursorVisible(false);
+                }
+                else if (action == MainMenuAction::Quit)
+                    m_window.close();
+            }
+
             if (m_devModeActive)
                 m_devMode.handleEvent(*event);
         }
@@ -106,33 +168,21 @@ namespace Metroidvania {
 
     void Game::update(float dt)
     {
+        if (m_gameState != GameState::Playing) return;
+
         if (!m_devModeActive)
         {
-            //update player
             m_player.update(dt, m_input, m_mgLayer);
-            m_camera.update(
-                dt,
-                m_player.getPosition(),
-                m_player.getAnimator().isFacingRight()
-            );
+            m_camera.update(dt, m_player.getPosition(),
+                m_player.getAnimator().isFacingRight());
 
-            // HUD
-            m_hud.update(
-                m_player.getHealth(),
-                m_player.getMaxHealth(),
-                1, 1  // full MP to verify color
-            );
-
-            // update enemies
             for (auto& enemy : m_enemies)
                 enemy.update(dt, m_mgLayer, m_player.getPosition());
 
-            // remove dead enemies
             m_enemies.erase(
                 std::remove_if(m_enemies.begin(), m_enemies.end(),
                     [](const Enemy& e) { return !e.isAlive(); }),
-                m_enemies.end()
-            );
+                m_enemies.end());
 
             const auto hitbox = m_player.getAttackHitbox();
             if (hitbox.has_value() && !m_player.hasHit())
@@ -140,62 +190,62 @@ namespace Metroidvania {
                 for (auto& enemy : m_enemies)
                 {
                     if (!enemy.isAlive()) continue;
-
-                    auto intersection = hitbox->findIntersection(enemy.getBounds());
-                    if (intersection.has_value())
+                    if (hitbox->findIntersection(enemy.getBounds()).has_value())
                     {
                         enemy.takeDamage(1);
-                        m_player.setHasHit(true);  // one hit per swing
+                        m_player.setHasHit(true);
                         break;
                     }
                 }
             }
+
+            m_hud.update(m_player.getHealth(), m_player.getMaxHealth(), 0, 1);
         }
         else
         {
             m_devMode.update(dt, m_window);
         }
 
-        // Parallax always updates regardless of devmode
         m_parallax.update(m_camera.getPosition());
     }
 
     void Game::render()
     {
-        m_camera.apply(m_window);
         m_window.clear(sf::Color::Black);
 
-        // Parallax - furthest back
-        m_parallax.draw(m_window);
+        if (m_gameState == GameState::MainMenu)
+        {
+            sf::View defaultView = m_window.getDefaultView();
+            m_window.setView(defaultView);
+            m_mainMenu.draw(m_window);
+            m_window.display();
+            return;
+        }
 
-        // World space layers - camera view active
+        //playing or paused - draw game world
+        m_camera.apply(m_window);
+
+        m_parallax.draw(m_window);
         m_bgLayer.draw(m_window);
         m_mgLayer.draw(m_window);
 
-        // draw enemies
         for (auto& enemy : m_enemies)
             enemy.draw(m_window);
 
         m_player.draw(m_window);
         m_fgLayer.draw(m_window);
-
-        m_player.draw(m_window);
-        m_fgLayer.draw(m_window);
         m_devMode.drawWorld(m_window);
 
-        // Screen space - reset to default view for HUD
-        m_devMode.drawHUD(m_window);
-
-        // Reapply camera view after HUD so nothing else draws in screen space
-        m_camera.apply(m_window);
-
         //screen space
-        m_devMode.drawHUD(m_window);
-
-        //reset to default view for HUD
         sf::View defaultView = m_window.getDefaultView();
         m_window.setView(defaultView);
+
+        m_devMode.drawHUD(m_window);
         m_hud.draw(m_window);
+
+        //pause overlay drawn on top of everything
+        if (m_gameState == GameState::Paused)
+            m_pauseMenu.draw(m_window);
 
         m_camera.apply(m_window);
         m_window.display();
@@ -272,6 +322,26 @@ namespace Metroidvania {
             m_player.setPosition(data.playerSpawn);
             std::cout << "[Game] Level loaded: " << m_levelName << "\n";
         }
+    }
+
+    void Game::resetGame()
+    {
+        // clear enemies
+        m_enemies.clear();
+
+        // clear tile layers
+        m_bgLayer = TileMap(80, 20);
+        m_mgLayer = TileMap(80, 20);
+        m_fgLayer = TileMap(80, 20);
+
+        // reset player position
+        m_player.setPosition(sf::Vector2f(256.f, 0.f));
+
+        // rebuild level
+        buildTestLevel();
+
+        // snap camera to player
+        m_camera.snapTo(m_player.getPosition());
     }
 
 }

@@ -13,7 +13,9 @@
 #include "Enemy.h"
 #include <vector>
 #include "HUD.h"
-
+#include "GameState.h"
+#include "PauseMenu.h"
+#include "MainMenu.h"
 
 namespace Metroidvania {
 
@@ -55,6 +57,13 @@ namespace Metroidvania {
         void buildTestLevel();
         void saveLevel();
         void loadLevel();
+        void resetGame();
+
+        sf::Font   m_font;
+        GameState  m_gameState = GameState::MainMenu;
+        PauseMenu  m_pauseMenu;
+        MainMenu   m_mainMenu;
+
     };
 
 }
